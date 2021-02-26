@@ -6,15 +6,15 @@
 </template>
 
 <script>
+import router from "@/router";
     export default {
-        methods: {
-            showSection3() {
-                this.$emit('showSection3')
-            }
+      setup() {
+        const showSection3 = () => {
+          router.push('/ccc')
         }
+        return {
+          showSection3
+        }
+      }
     }
 </script>
-
-<style scoped>
-
-</style>

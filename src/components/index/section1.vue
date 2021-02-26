@@ -6,17 +6,15 @@
 </template>
 
 <script>
+import router from "@/router";
     export default {
-        methods: {
-            showSection2() {
-                this.$emit('showSection2')
-            }
+      setup() {
+        const showSection2 = () => {
+          router.push('/bbb')
         }
+        return {
+          showSection2
+        }
+      }
     }
 </script>
-
-<style lang="scss" scoped>
-    //.add{
-     //   background-color: red;
-    //}
-</style>

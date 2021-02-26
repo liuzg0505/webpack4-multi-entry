@@ -1,8 +1,9 @@
 const path = require('path')
-const merge = require("webpack-merge")
-const cleanWebpackPlugin = require("clean-webpack-plugin")
+const {merge} = require("webpack-merge")
+const {CleanWebpackPlugin} = require("clean-webpack-plugin")
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const MiniCssExtractPlugin  =  require('mini-css-extract-plugin')
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const webpackConfigBase = require('./webpack.base.conf')
 const TerserPlugin = require('terser-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
@@ -20,10 +21,9 @@ const webpackConfigProd = {
 		publicPath: './'
 	},
 
-	devtool: 'cheap-module-source-map',
 
 	plugins: [
-		new cleanWebpackPlugin(['dist'], {
+		new CleanWebpackPlugin({
 			root: path.resolve(__dirname, '../'), //根目录
 			verbose: true, //开启在控制台输出信息
 			dry: false,
@@ -51,61 +51,50 @@ const webpackConfigProd = {
 			minRatio: 0.8, // 默认: 0.8
 			// 是否删除源文件，默认: false
 			deleteOriginalAssets: false
-		})
+		}),
+		new FriendlyErrorsWebpackPlugin()
 	],
 	optimization: {
 		minimizer: [
 			new TerserPlugin({
+				test: /\.m?js(\?.*)?$/i,
 				terserOptions: {
-					test: /\.m?js(\?.*)?$/i,
-					chunkFilter: () => true,
-					warningsFilter: () => true,
-					extractComments: false,
-					sourceMap: false,
-					cache: true,
-					cacheKeys: defaultCacheKeys => defaultCacheKeys,
-					parallel: true,
-					include: undefined,
-					exclude: undefined,
-					minify: undefined,
-					terserOptions: {
-						output: {
-							comments: /^\**!|@preserve|@license|@cc_on/i
-						},
-						compress: {
-							arrows: false,
-							collapse_vars: false,
-							comparisons: false,
-							computed_props: false,
-							hoist_funs: false,
-							hoist_props: false,
-							hoist_vars: false,
-							inline: false,
-							loops: false,
-							negate_iife: false,
-							properties: false,
-							reduce_funcs: false,
-							reduce_vars: false,
-							switches: false,
-							toplevel: false,
-							typeofs: false,
-							booleans: true,
-							if_return: true,
-							sequences: true,
-							unused: true,
-							conditionals: true,
-							dead_code: true,
-							evaluate: true,
-							warnings: false,
-							drop_console: true,
-							drop_debugger: true,
-							pure_funcs: [
-								'console.log'
-							]
-						},
-						mangle: {
-							safari10: true
-						}
+					compress: {
+						arrows: false,
+						collapse_vars: false,
+						comparisons: false,
+						computed_props: false,
+						hoist_funs: false,
+						hoist_props: false,
+						hoist_vars: false,
+						inline: false,
+						loops: false,
+						negate_iife: false,
+						properties: false,
+						reduce_funcs: false,
+						reduce_vars: false,
+						switches: false,
+						toplevel: false,
+						typeofs: false,
+						booleans: true,
+						if_return: true,
+						sequences: true,
+						unused: true,
+						conditionals: true,
+						dead_code: true,
+						evaluate: true,
+						warnings: false,
+						drop_console: true,
+						drop_debugger: true,
+						pure_funcs: [
+							'console.log'
+						]
+					},
+					output: {
+						comments: /^\**!|@preserve|@license|@cc_on/i
+					},
+					mangle: {
+						safari10: true
 					}
 				},
 			})
