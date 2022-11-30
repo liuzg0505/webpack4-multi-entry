@@ -1,6 +1,7 @@
 const path = require('path')
 const glob = require("glob")
 const webpack = require("webpack")
+const WebpackBar = require('webpackbar')
 const {VueLoaderPlugin} = require('vue-loader')
 
 const EC = require("./entry-config")
@@ -16,22 +17,11 @@ const copyWebpackPlugin = require("copy-webpack-plugin")
 const rules = require("./webpack.rules.conf.js")
 // 获取html-webpack-plugin参数的方法
 const getHtmlConfig = function (name, chunks) {
-    // console.log('------ ', name, ' --------------')
-    // console.log(chunks)
-    // 指定 html模板名
-    // const templateName = templateConfig[name].html.slice(0, -5)
-    // 不指定 html模板名 - 默认为模块名
-    // let templateName = name
-    // glob.sync(`./src/pages/${name}/*.html`)
-    //     .forEach(function (htmlName) {
-    //         // console.log('----',htmlName)
-    //         templateName = htmlName.slice(htmlName.lastIndexOf('/') + 1, -5)
-    //     })
-    // 默认 html 模板名是 index.html
-    const templateName = 'index'
+    const templateName = templateConfig[name] ?
+        templateConfig[name].html :
+        'index.html'
     return {
-        template: `./src/pages/${name}/${templateName}.html`,
-        // filename: process.env.NODE_ENV === "development"? `${name.slice(name.lastIndexOf('/') + 1)}.html`:`html/${name.slice(name.lastIndexOf('/') + 1)}.html`,
+        template: `./src/entrance/${name}/${templateName}`,
         filename: `${name}.html`,
         inject: true,
         hash: false, //开启hash  ?[hash]
@@ -47,14 +37,14 @@ const getHtmlConfig = function (name, chunks) {
 
 function globs(entry) {
     // 读取src目录所有page入口
-    glob.sync('./src/pages/**/index.js')
+    glob.sync('./src/entrance/**/index.js')
         .forEach(function (name) {
             let start = name.indexOf('src/') + 4,
                 end = name.length - 3
             let eArr = ["babel-polyfill"]
             let n = name.slice(start, end)
             n = n.slice(0, n.lastIndexOf('/')) //保存各个组件的入口
-            n = n.split('pages/')[1]
+            n = n.split('entrance/')[1]
             eArr.push(name)
             entry[n] = eArr
         })
@@ -65,8 +55,8 @@ function getEntry() {
     if(Object.keys(entryConfig).length !== 0) {
         globs(entry)
         Object.keys(entryConfig).forEach(chunkName => {
-            const entryJsName = entryConfig[chunkName].js ? entryConfig[chunkName].js.slice(0, -3) : 'index'
-            const path = `./src/pages/${chunkName}/${entryJsName}.js`
+            const entryJsName = entryConfig[chunkName].js ? entryConfig[chunkName].js : 'index.js'
+            const path = `./src/entrance/${chunkName}/${entryJsName}`
             entry[chunkName] = [path]
         })
     } else {
@@ -81,7 +71,7 @@ module.exports = {
         rules: [...rules]
     },
     resolve: {
-        extensions: ['.js', '.vue', '.json', 'jsx'],
+        extensions: ['.js', '.vue', '.json', '.jsx'],
         alias: {
             '@': path.resolve(__dirname, '../src'),
             vue: "vue/dist/vue.esm-bundler.js"
@@ -105,13 +95,13 @@ module.exports = {
                     // 设置优先级，防止和自定义的公共代码提取时被覆盖，不进行打包
                     priority: 10,
                 },
-                // utils: {
-                //     // 抽离自己写的公共代码，common这个名字可以随意起
-                //     chunks: 'initial',
-                //     name: 'common', // 任意命名
-                //     minSize: 0, // 只要超出0字节就生成一个新包
-                //     minChunks: 2
-                // }
+                utils: {
+                    // 抽离自己写的公共代码，common这个名字可以随意起
+                    chunks: 'initial',
+                    name: 'common', // 任意命名
+                    minSize: 30, // 只要超出0字节就生成一个新包
+                    minChunks: 2
+                }
             }
         }
     },
@@ -128,7 +118,8 @@ module.exports = {
             "__VUE_OPTIONS_API__": true,
             "__VUE_PROD_DEVTOOLS__": false,
         }),
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new WebpackBar()
     ]
 }
 

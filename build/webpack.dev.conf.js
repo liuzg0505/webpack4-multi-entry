@@ -7,10 +7,6 @@ const webpack = require("webpack")
 const os = require('os')
 
 
-const EC = require("./entry-config")
-const devOpenPage = EC.DEV_OPEN_PAGE  // 配置 run dev 默认打开哪个页面
-
-
 function getIPAddress() {
     const interfaces = os.networkInterfaces()
     for (let devName in interfaces) {
@@ -35,14 +31,14 @@ const webpackConfigDev = merge(webpackConfigBase, {
     },
     devtool: 'eval-cheap-module-source-map',
     devServer: {
-        contentBase: path.join(__dirname, "../src/pages/index"),
-        openPage: devOpenPage || 'index.html', // 配置 run dev 默认打开哪个页面
+        contentBase: path.join(__dirname, "../dist"),
         publicPath: '/',
-        clientLogLevel: "warning",
-        host: getIPAddress(),
+        clientLogLevel: 'silent',
+        noInfo: true,
+        host: '0.0.0.0',
         // inline: true, //实时刷新
         overlay: true, // 浏览器页面上显示错误
-        open: true, // 开启浏览器
+        open: false, // 开启浏览器
         quiet: true,
         hot: true
     },
@@ -61,7 +57,7 @@ module.exports = new Promise((resolve, reject) => {
             webpackConfigDev.plugins.push(new FriendlyErrorsWebpackPlugin({
                 compilationSuccessInfo: {
                     messages: [
-                        `server running at:   \n - Local:   http://localhost:${port}  \n - Network: http://${webpackConfigDev.devServer.host}:${port}
+                        `server running at:   \n - Local:   http://localhost:${port}  \n - Network: http://${getIPAddress()}:${port}
                         `
                     ],
                 },
